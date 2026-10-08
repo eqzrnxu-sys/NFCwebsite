@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>미드나잇 타로</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#0a0714; --deep:#160c28; --panel:#20123a; --panel-2:#2a1748;
+  --line:#3d275e; --gold:#c8a24d; --gold-soft:#e8cf93; --gold-dim:#8a723f;
+  --ink:#f5eefc; --ink-dim:#b3a0cf; --ink-faint:#7a6598;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  background:radial-gradient(ellipse 120% 80% at 50% -10%,#2c1a4d 0%,transparent 55%),
+             radial-gradient(ellipse 100% 60% at 80% 100%,#1e0f38 0%,transparent 60%),var(--void);
+  color:var(--ink); font-family:'Noto Sans KR',sans-serif; font-weight:400;
+  min-height:100vh; overflow-x:hidden; -webkit-font-smoothing:antialiased; position:relative;
+}
+.serif{font-family:'Noto Serif KR',serif;}
+#stars{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.star{position:absolute;background:var(--gold-soft);border-radius:50%;opacity:.5;animation:twinkle 4s ease-in-out infinite;}
+@keyframes twinkle{0%,100%{opacity:.15;}50%{opacity:.9;}}
+.app{position:relative;z-index:1;max-width:460px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding:0 20px;}
+.progress-wrap{padding:18px 0 8px;display:none;}
+.progress-wrap.show{display:block;}
+.progress-track{height:2px;background:var(--line);border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold-soft));transition:width .5s ease;}
+.progress-label{margin-top:8px;font-size:11px;letter-spacing:.08em;color:var(--ink-faint);}
+.screen{display:none;flex:1;flex-direction:column;padding:28px 0 48px;animation:fadeUp .5s ease;}
+.screen.active{display:flex;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+#screen-intro{justify-content:center;align-items:center;text-align:center;min-height:100vh;padding:40px 0;}
+.sigil{width:76px;height:76px;margin-bottom:28px;opacity:.9;}
+.brand-title{font-family:'Noto Serif KR',serif;font-weight:700;font-size:34px;letter-spacing:.04em;color:var(--gold-soft);line-height:1.3;}
+.brand-sub{margin-top:14px;font-size:14.5px;color:var(--ink-dim);line-height:1.8;max-width:300px;}
+.brand-rule{width:40px;height:1px;background:var(--gold-dim);margin:24px auto;}
+.btn{appearance:none;border:none;cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:15px;font-weight:600;padding:15px 28px;border-radius:3px;letter-spacing:.01em;transition:transform .15s ease,box-shadow .15s ease;}
+.btn-primary{background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:#1a0f2e;box-shadow:0 6px 24px -8px rgba(200,162,77,.5);}
+.btn-primary:active{transform:scale(.98);}
+.btn-primary:disabled{opacity:.35;cursor:not-allowed;box-shadow:none;}
+.btn-ghost{background:transparent;color:var(--ink-dim);border:1px solid var(--line);font-weight:500;}
+.btn-ghost:active{transform:scale(.98);}
+.btn-block{width:100%;}
+.btn-row{display:flex;gap:10px;margin-top:auto;padding-top:24px;}
+.btn-row .btn{flex:1;}
+.step-eyebrow{font-size:12px;color:var(--gold-dim);letter-spacing:.06em;margin-bottom:6px;font-weight:600;}
+.step-title{font-family:'Noto Serif KR',serif;font-weight:700;font-size:22px;color:var(--ink);line-height:1.45;margin-bottom:8px;}
+.step-desc{font-size:13.5px;color:var(--ink-dim);line-height:1.75;margin-bottom:22px;}
+.field{margin-bottom:18px;}
+.field label{display:block;font-size:12.5px;color:var(--ink-dim);margin-bottom:8px;}
+.field input,.field textarea{width:100%;background:var(--panel);border:1px solid var(--line);color:var(--ink);font-family:'Noto Sans KR',sans-serif;font-size:15px;font-weight:500;padding:13px 14px;border-radius:3px;outline:none;transition:border-color .2s,background .2s;}
+.field input:focus,.field textarea:focus{border-color:var(--gold-dim);background:var(--panel-2);}
+.field textarea{resize:vertical;min-height:130px;line-height:1.6;}
+.char-count{text-align:right;font-size:11px;color:var(--ink-faint);margin-top:6px;}
+.topic-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:10px;}
+.topic-chip{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:16px 10px;text-align:center;cursor:pointer;font-size:14px;font-weight:600;color:var(--ink-dim);transition:all .2s;}
+.topic-chip.selected{border-color:var(--gold);background:var(--panel-2);color:var(--gold-soft);}
+.topic-chip .ti-sub{display:block;font-size:11px;font-weight:400;color:var(--ink-faint);margin-top:4px;}
+.confirm-card{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:20px;margin-bottom:14px;}
+.confirm-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);gap:16px;}
+.confirm-row:last-child{border-bottom:none;}
+.confirm-key{font-size:12.5px;color:var(--ink-faint);white-space:nowrap;}
+.confirm-val{font-size:14px;color:var(--ink);text-align:right;line-height:1.6;font-weight:500;}
+.confirm-val.concern{text-align:left;margin-top:4px;color:var(--ink-dim);white-space:pre-wrap;font-weight:400;}
+.confirm-row.stack{flex-direction:column;}
+.circle-wrap{position:relative;width:100%;height:300px;margin:6px 0 16px;}
+.circle-glow{position:absolute;inset:30px;border-radius:50%;border:1px dashed var(--line);opacity:.6;}
+.mini-card{position:absolute;width:42px;height:63px;left:50%;top:50%;margin-left:-21px;margin-top:-31.5px;cursor:pointer;border-radius:4px;overflow:hidden;background:linear-gradient(155deg,var(--panel-2),var(--deep));border:1px solid var(--line);transition:transform .25s ease,opacity .3s ease,box-shadow .25s;}
+.mini-card::before{content:'';position:absolute;inset:3px;border:1px solid var(--gold-dim);border-radius:3px;opacity:.5;}
+.mini-card::after{content:'';position:absolute;left:50%;top:50%;width:10px;height:10px;transform:translate(-50%,-50%) rotate(45deg);border:1px solid var(--gold-dim);opacity:.6;}
+.mini-card:active{box-shadow:0 0 18px -2px rgba(232,207,147,.6);}
+.mini-card.picked{opacity:0;pointer-events:none;transform:scale(.6) translateY(-10px);}
+.mini-card.disabled{pointer-events:none;}
+.select-status{display:flex;justify-content:center;margin-bottom:4px;}
+.select-count{font-size:13px;color:var(--gold-soft);font-weight:600;}
+.picked-strip{display:flex;gap:8px;justify-content:center;margin-top:10px;}
+.pick-slot{width:34px;height:50px;border:1px dashed var(--line);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--ink-faint);}
+.pick-slot.filled{border-style:solid;border-color:var(--gold-dim);background:var(--panel-2);}
+#screen-reveal{align-items:center;}
+.reveal-cards{display:flex;gap:14px;justify-content:center;margin:20px 0 24px;perspective:1000px;}
+.flip-card{width:92px;height:140px;position:relative;cursor:pointer;}
+.flip-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .9s cubic-bezier(.2,.8,.2,1);}
+.flip-card.flipped .flip-inner{transform:rotateY(180deg);}
+.flip-glow{position:absolute;inset:-18px;border-radius:50%;background:radial-gradient(circle,rgba(232,207,147,.55),transparent 65%);opacity:0;pointer-events:none;}
+.flip-card.flipped .flip-glow{animation:burst .7s ease-out;}
+@keyframes burst{0%{opacity:.9;transform:scale(.3);}100%{opacity:0;transform:scale(1.6);}}
+.flip-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:6px;border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px;}
+.flip-back{background:linear-gradient(155deg,var(--panel-2),var(--deep));}
+.flip-back::before{content:'';position:absolute;inset:5px;border:1px solid var(--gold-dim);border-radius:4px;opacity:.5;}
+.flip-front{background:linear-gradient(160deg,#28163f,#170b29);transform:rotateY(180deg);text-align:center;}
+.flip-front svg{width:74px;height:74px;margin-bottom:6px;}
+.flip-front .fc-name{font-family:'Noto Serif KR',serif;font-size:11.5px;font-weight:700;color:var(--gold-soft);line-height:1.3;}
+.flip-front .fc-suit{font-size:9px;color:var(--ink-faint);margin-top:2px;}
+.position-labels{display:flex;gap:14px;justify-content:center;margin-bottom:6px;}
+.position-labels span{width:92px;text-align:center;font-size:10.5px;color:var(--ink-faint);font-weight:600;}
+.reveal-hint{text-align:center;font-size:12.5px;color:var(--ink-dim);margin-bottom:8px;min-height:18px;}
+.tabs{display:flex;gap:6px;margin-bottom:18px;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:4px;}
+.tab{flex:1;text-align:center;padding:9px 4px;font-size:12.5px;font-weight:600;color:var(--ink-dim);cursor:pointer;border-radius:3px;transition:background .2s,color .2s;}
+.tab.active{background:var(--panel-2);color:var(--gold-soft);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;animation:fadeUp .4s ease;}
+.result-card-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--line);}
+.result-card-head svg{width:84px;height:84px;flex-shrink:0;}
+.result-card-head .name-ko{font-family:'Noto Serif KR',serif;font-weight:700;font-size:17px;color:var(--gold-soft);}
+.result-card-head .name-en{font-size:11px;color:var(--ink-faint);margin-top:2px;}
+.result-text{font-size:14px;line-height:1.9;color:var(--ink);font-weight:400;}
+.result-text .quote{color:var(--gold-soft);font-weight:600;}
+.synth-box{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:18px;margin:22px 0;font-size:13.5px;line-height:1.85;color:var(--ink-dim);}
+.synth-box .synth-title{font-family:'Noto Serif KR',serif;font-weight:700;font-size:14.5px;color:var(--gold-soft);margin-bottom:10px;}
+.fun-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px;}
+.fun-item{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:12px 8px;text-align:center;}
+.fun-item .fi-label{font-size:10.5px;color:var(--ink-faint);margin-bottom:6px;}
+.fun-item .fi-val{font-family:'Noto Serif KR',serif;font-weight:700;font-size:14.5px;color:var(--gold-soft);}
+.gauge-wrap{margin-top:14px;}
+.gauge-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.gauge-row .gl{width:62px;font-size:11.5px;color:var(--ink-dim);flex-shrink:0;font-weight:500;}
+.gauge-track{flex:1;height:5px;background:var(--panel-2);border-radius:3px;overflow:hidden;}
+.gauge-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold-soft));border-radius:3px;}
+.gauge-num{width:28px;text-align:right;font-size:11.5px;color:var(--ink-faint);}
+#screen-hidden{align-items:center;text-align:center;justify-content:center;}
+.hidden-orb{width:100px;height:100px;border-radius:50%;margin:10px auto 26px;position:relative;cursor:pointer;background:radial-gradient(circle at 35% 30%,var(--panel-2),var(--deep) 70%);border:1px solid var(--gold-dim);display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px -8px rgba(200,162,77,.4);transition:transform .3s ease;}
+.hidden-orb:active{transform:scale(.95);}
+.hidden-orb svg{width:34px;height:34px;}
+.hidden-result{display:none;margin-top:6px;}
+.hidden-result.show{display:block;animation:fadeUp .6s ease;}
+#screen-share{text-align:center;}
+.share-actions{display:flex;flex-direction:column;gap:10px;margin-top:22px;}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(10px);background:var(--panel-2);border:1px solid var(--gold-dim);color:var(--gold-soft);font-size:13px;font-weight:600;padding:11px 20px;border-radius:4px;opacity:0;pointer-events:none;transition:all .3s ease;z-index:50;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+canvas#exportCanvas{display:none;}
+::selection{background:var(--gold-dim);color:#fff;}
+</style>
+</head>
+<body>
+<div id="stars"></div>
+<div class="app">
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-label" id="progressLabel"></div>
+  </div>
+
+  <section class="screen active" id="screen-intro">
+    <svg class="sigil" viewBox="0 0 100 100" fill="none">
+      <circle cx="50" cy="50" r="30" stroke="#c8a24d" stroke-width="1"/>
+      <circle cx="50" cy="50" r="3" fill="#e8cf93"/>
+      <path d="M50 8 L50 20 M50 80 L50 92 M8 50 L20 50 M80 50 L92 50" stroke="#c8a24d" stroke-width="1"/>
+      <path d="M22 22 L30 30 M70 70 L78 78 M78 22 L70 30 M30 70 L22 78" stroke="#8a723f" stroke-width="1"/>
+    </svg>
+    <h1 class="brand-title">미드나잇<br>타로</h1>
+    <div class="brand-rule"></div>
+    <p class="brand-sub">괜찮아요, 편하게 마음을 꺼내 놓으세요.<br>78장의 카드가 당신 이야기에 귀 기울일게요.</p>
+    <div style="margin-top:40px;width:100%;max-width:260px;">
+      <button class="btn btn-primary btn-block" onclick="goTo('screen-info')">리딩 시작하기</button>
+    </div>
+  </section>
+
+  <section class="screen" id="screen-info">
+    <div class="step-eyebrow">STEP 1</div>
+    <h2 class="step-title">먼저 당신 이야기를 들려주세요</h2>
+    <p class="step-desc">이름이랑 생년월일을 알려주시면, 당신에게 더 꼭 맞는 기운을 읽어볼 수 있어요.</p>
+    <div class="field"><label for="inputName">이름</label><input type="text" id="inputName" placeholder="예) 김서연" maxlength="20"></div>
+    <div class="field"><label for="inputBirth">생년월일</label><input type="date" id="inputBirth"></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goTo('screen-intro')">이전</button>
+      <button class="btn btn-primary" id="btnInfoNext" onclick="goTo('screen-topic')" disabled>다음</button>
+    </div>
+  </section>
+
+  <section class="screen" id="screen-topic">
+    <div class="step-eyebrow">STEP 2</div>
+    <h2 class="step-title">요즘 어떤 고민이 가장 크세요?</h2>
+    <p class="step-desc">제일 가까운 걸 골라주시면, 그 마음에 맞춰 카드를 풀어볼게요.</p>
+    <div class="topic-grid" id="topicGrid"></div>
+  </section>
+
+  <section class="screen" id="screen-concern">
+    <div class="step-eyebrow">STEP 3</div>
+    <h2 class="step-title">조금 더 자세히 적어볼까요?</h2>
+    <p class="step-desc">어떤 상황이었는지, 왜 마음이 쓰이는지 적어주시면 훨씬 더 당신에게 맞는 이야기를 들려드릴 수 있어요. 편하게, 하고 싶은 말 그대로 적어주세요.</p>
+    <div class="field">
+      <textarea id="inputConcern" maxlength="400" placeholder="예) 요즘 만나는 사람이 있는데 연락이 뜸해져서 마음이 자꾸 흔들려요. 괜히 혼자 서운해하는 건가 싶기도 하고요."></textarea>
+      <div class="char-count"><span id="concernCount">0</span> / 400</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goTo('screen-topic')">이전</button>
+      <button class="btn btn-primary" id="btnConcernNext" onclick="prepareConfirm()" disabled>다음</button>
+    </div>
+  </section>
+
+  <section class="screen" id="screen-confirm">
+    <div class="step-eyebrow">STEP 4</div>
+    <h2 class="step-title">이렇게 적어주셨어요, 맞을까요?</h2>
+    <p class="step-desc">확인되면 바로 카드를 펼쳐볼게요.</p>
+    <div class="confirm-card">
+      <div class="confirm-row"><div class="confirm-key">이름</div><div class="confirm-val" id="confirmName"></div></div>
+      <div class="confirm-row"><div class="confirm-key">생년월일</div><div class="confirm-val" id="confirmBirth"></div></div>
+      <div class="confirm-row"><div class="confirm-key">고민 분야</div><div class="confirm-val" id="confirmTopic"></div></div>
+      <div class="confirm-row stack"><div class="confirm-key">고민</div><div class="confirm-val concern" id="confirmConcern"></div></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goTo('screen-concern')">다시 쓸게요</button>
+      <button class="btn btn-primary" onclick="startCardSelect()">카드 펼치기</button>
+    </div>
+  </section>
+
+  <section class="screen" id="screen-select">
+    <div class="step-eyebrow">STEP 5</div>
+    <h2 class="step-title">마음 가는 카드 3장을 골라주세요</h2>
+    <p class="step-desc" style="margin-bottom:10px;">순서대로 현재 · 미래 · 조언이 돼요. 생각하지 말고, 그냥 끌리는 대로 짚어보세요.</p>
+    <div class="select-status"><div class="select-count" id="selectCount">0 / 3장 선택</div></div>
+    <div class="circle-wrap" id="circleWrap"><div class="circle-glow"></div></div>
+    <div class="picked-strip" id="pickedStrip"></div>
+  </section>
+
+  <section class="screen" id="screen-reveal">
+    <div class="step-eyebrow">STEP 6</div>
+    <h2 class="step-title" style="text-align:center;">카드를 열어볼까요?</h2>
+    <div class="position-labels"><span>현재 상황</span><span>미래의 흐름</span><span>필요한 조언</span></div>
+    <div class="reveal-cards" id="revealCards"></div>
+    <div class="reveal-hint" id="revealHint">카드를 하나씩 눌러 공개하세요</div>
+    <div class="btn-row" style="margin-top:10px;">
+      <button class="btn btn-primary btn-block" id="btnToResults" onclick="showResults()" disabled>해석 보기</button>
+    </div>
+  </section>
+
+  <section class="screen" id="screen-results">
+    <div class="step-eyebrow">STEP 7</div>
+    <h2 class="step-title"><span id="resultsName"></span>님을 위한 이야기예요</h2>
+    <div class="tabs" id="tabs">
+      <div class="tab active" data-tab="present">현재 상황</div>
+      <div class="tab" data-tab="future">미래의 흐름</div>
+      <div class="tab" data-tab="advice">필요한 조언</div>
+    </div>
+    <div class="tab-panel active" id="panel-present"></div>
+    <div class="tab-panel" id="panel-future"></div>
+    <div class="tab-panel" id="panel-advice"></div>
+    <div class="synth-box"><div class="synth-title">종합 리딩</div><div id="synthText"></div></div>
+    <div class="fun-grid">
+      <div class="fun-item"><div class="fi-label">오늘의 키워드</div><div class="fi-val" id="funKeyword">-</div></div>
+      <div class="fun-item"><div class="fi-label">당신의 행운의 색</div><div class="fi-val" id="funColor">-</div></div>
+      <div class="fun-item"><div class="fi-label">행운의 숫자</div><div class="fi-val" id="funNumber">-</div></div>
+    </div>
+    <div class="gauge-wrap">
+      <div class="gauge-row"><div class="gl">연애운</div><div class="gauge-track"><div class="gauge-fill" id="gaugeLove"></div></div><div class="gauge-num" id="gaugeLoveNum"></div></div>
+      <div class="gauge-row"><div class="gl">금전운</div><div class="gauge-track"><div class="gauge-fill" id="gaugeMoney"></div></div><div class="gauge-num" id="gaugeMoneyNum"></div></div>
+      <div class="gauge-row"><div class="gl">관계운</div><div class="gauge-track"><div class="gauge-fill" id="gaugeRel"></div></div><div class="gauge-num" id="gaugeRelNum"></div></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-primary btn-block" onclick="goTo('screen-hidden')">마지막, 숨겨진 카드 보기</button></div>
+  </section>
+
+  <section class="screen" id="screen-hidden">
+    <div class="step-eyebrow">STEP 8</div>
+    <h2 class="step-title">숨겨진 카드 한 장</h2>
+    <p class="step-desc">이 모든 이야기 끝에, 마지막으로 건네고 싶은 말이 한 장 더 남아있어요.</p>
+    <div class="hidden-orb" id="hiddenOrb" onclick="revealHidden()">
+      <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="14" stroke="#c8a24d" stroke-width="1"/><circle cx="20" cy="20" r="2" fill="#e8cf93"/></svg>
+    </div>
+    <div class="hidden-result" id="hiddenResult">
+      <div class="result-card-head" style="justify-content:center;" id="hiddenCardHead"></div>
+      <div class="result-text" id="hiddenText" style="text-align:left;"></div>
+      <div class="btn-row"><button class="btn btn-primary btn-block" onclick="goTo('screen-share')">결과 마무리하기</button></div>
+    </div>
+  </section>
+
+  <section class="screen" id="screen-share">
+    <div class="step-eyebrow">STEP 9</div>
+    <h2 class="step-title">오늘 이야기는 여기까지예요</h2>
+    <p class="step-desc">결과를 저장하거나 문구로 복사해 보관해두세요. 오늘의 카드는 미래를 정해놓은 답이 아니라, 지금 당신 마음을 한 번 더 비춰보는 거울 같은 거예요. 수고하셨어요.</p>
+    <div class="share-actions">
+      <button class="btn btn-primary btn-block" onclick="saveAsImage()">이미지로 저장</button>
+      <button class="btn btn-ghost btn-block" onclick="copyShareText()">결과 문구 복사하기</button>
+      <button class="btn btn-ghost btn-block" onclick="restartAll()">처음으로 돌아가기</button>
+    </div>
+  </section>
+</div>
+<canvas id="exportCanvas" width="800" height="1200"></canvas>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== MAJOR ARCANA (22) ===== */
+const MAJOR=[
+['바보','THE FOOL','새로운 시작','아직 정해지지 않은 길 위에서 순수한 가능성과 함께 첫 발을 내딛는 카드예요.','전통적으로 자유, 모험, 믿음을 뜻하지만 준비 없이 뛰어드는 무모함에 대한 살짝의 경고도 담겨 있어요. 결과를 걱정하기보다 일단 시작하는 용기가 핵심이에요.'],
+['마법사','THE MAGICIAN','실행력','이미 가진 재능과 자원으로 상황을 스스로 만들어갈 수 있다는 카드예요.','탁자 위의 네 가지 도구는 의지, 감정, 생각, 현실을 상징해요. 필요한 건 이미 손안에 있고, 이제 집중해서 행동으로 옮기기만 하면 된다는 의미예요.'],
+['여사제','THE HIGH PRIESTESS','직관','말로 꺼내지 못한 마음과 겉으로 드러나지 않은 진실에 귀 기울이라는 카드예요.','지식보다 직관, 행동보다 고요한 관찰이 중요한 때예요. 아직 공개되지 않은 정보나 상대의 속마음이 있을 수 있으니 서두르지 말고 기다려 보세요.'],
+['여황제','THE EMPRESS','풍요','돌봄과 풍요 속에서 상황이 무르익어가는 흐름을 보여주는 카드예요.','사랑, 창조, 결실을 상징하며 몸과 마음을 아끼는 일이 곧 운을 키우는 일이라고 말해요. 억지로 밀어붙이기보다 자연스럽게 자라도록 두는 시기예요.'],
+['황제','THE EMPEROR','안정','기준과 질서를 세워 상황을 다잡으려는 마음을 나타내는 카드예요.','책임감, 리더십, 계획성을 뜻해요. 감정에 휩쓸리기보다 원칙과 구조를 세우면 흔들리지 않지만, 지나친 고집은 관계를 경직시킬 수 있어요.'],
+['교황','THE HIEROPHANT','조언','검증된 방식과 믿을 만한 조언에 기대고 싶은 마음을 뜻하는 카드예요.','전통, 배움, 멘토를 상징해요. 혼자 결론 내리기보다 경험 있는 사람의 말을 듣거나 이미 검증된 방법을 따르는 것이 도움이 되는 시기예요.'],
+['연인','THE LOVERS','선택','마음이 진짜 향하는 곳을 확인해야 하는 선택의 갈림길을 나타내요.','사랑뿐 아니라 가치관에 따른 중요한 결정을 뜻해요. 남의 기대가 아닌 내 진심과 일치하는 선택을 할수록 마음이 편안해져요.'],
+['전차','THE CHARIOT','추진력','상반된 마음을 하나로 모아 앞으로 나아가는 의지를 보여주는 카드예요.','승리, 집중, 자기통제를 뜻해요. 흔들리는 감정을 다잡고 방향을 정하면 막혔던 일이 빠르게 풀릴 수 있어요.'],
+['힘','STRENGTH','내면의 용기','감정을 억누르기보다 부드럽게 다루는 용기를 말해주는 카드예요.','진짜 힘은 강하게 누르는 게 아니라 인내와 연민으로 다독이는 데서 나와요. 불안하거나 화나는 마음도 천천히 길들이면 큰 힘이 돼요.'],
+['은둔자','THE HERMIT','성찰','혼자만의 시간 속에서 스스로에게 답을 구하라는 카드예요.','내면의 등불을 따라 걷는 때예요. 잠시 거리를 두고 생각을 정리하면 다른 사람의 말이 아닌 내 안의 확신이 보이기 시작해요.'],
+['운명의 수레바퀴','WHEEL OF FORTUNE','전환점','흐름이 바뀌는 전환점을 알리는 카드예요.','행운과 기회, 그리고 모든 것이 순환한다는 이치를 뜻해요. 지금의 어려움도 영원하지 않고, 흐름이 바뀌는 순간을 놓치지 않는 것이 중요해요.'],
+['정의','JUSTICE','균형','선택의 결과와 책임을 마주하며 균형을 찾는 카드예요.','공정함, 진실, 인과응보를 상징해요. 감정이 아닌 사실에 근거해 판단하고, 내가 한 선택에 책임지는 태도가 좋은 결과로 이어져요.'],
+['매달린 사람','THE HANGED MAN','기다림','잠시 멈춰 다른 시각으로 바라보라는 신호예요.','희생과 정지, 관점의 전환을 뜻해요. 억지로 움직여도 막히는 때이니, 멈춤을 손해가 아닌 새로운 통찰의 시간으로 받아들여 보세요.'],
+['죽음','DEATH','매듭','한 국면이 끝나고 새로운 국면이 열리는 카드예요.','실제 죽음이 아니라 변화와 마무리, 재탄생을 상징해요. 놓아야 할 것을 놓아야 새로운 것이 들어올 자리가 생겨요.'],
+['절제','TEMPERANCE','조화','서로 다른 것을 서두르지 않고 맞춰가는 카드예요.','균형, 인내, 중용을 뜻해요. 극단을 피하고 천천히 섞고 조율하면 관계도 일도 안정적으로 자리잡아요.'],
+['악마','THE DEVIL','집착','스스로를 묶고 있는 패턴이나 집착을 직시하라는 카드예요.','유혹, 중독, 얽매임을 상징해요. 다만 카드 속 사슬은 느슨해서 스스로 벗어날 수 있다는 점이 핵심이에요.'],
+['타워','THE TOWER','급변','갑작스러운 변화가 낡은 것을 무너뜨리는 카드예요.','충격적이지만 거짓 위에 세운 것이 무너지는 정화의 과정이에요. 무너진 자리에서 더 단단한 기반을 다시 세울 수 있어요.'],
+['별','THE STAR','회복','힘든 시간 뒤에 찾아오는 희망과 위안을 뜻하는 카드예요.','치유, 영감, 믿음을 상징해요. 지금은 작은 빛처럼 보여도 천천히 마음이 채워지고 길이 보이기 시작하는 시기예요.'],
+['달','THE MOON','불안','확실하지 않은 것 앞에서 흔들리는 마음을 보여주는 카드예요.','불안, 착각, 숨겨진 감정을 뜻해요. 어둠 속에선 그림자가 실제보다 커 보이니, 확인되지 않은 추측으로 결론 내리지 말고 날이 밝을 때를 기다리세요.'],
+['태양','THE SUN','확신','숨김없이 드러나는 밝고 긍정적인 결과를 뜻하는 카드예요.','성공, 기쁨, 활력을 상징해요. 오해가 풀리고 상황이 선명해지며 자신감을 가져도 좋은 시기예요.'],
+['심판','JUDGEMENT','재정비','지나온 시간을 돌아보고 다시 일어서는 카드예요.','각성, 부름, 용서를 뜻해요. 과거를 정리하고 새로운 삶의 방향으로 응답하는 중요한 전환의 순간이에요.'],
+['세계','THE WORLD','완성','하나의 여정이 온전히 매듭지어지는 카드예요.','완성, 통합, 성취를 상징해요. 그동안의 노력이 결실을 맺고, 다음 단계로 나아갈 준비가 되었다는 의미예요.']
+].map((c,i)=>({ko:c[0],en:c[1],kw:c[2],essence:c[3],detail:c[4],id:i,arc:'major'}));
+
+/* ===== MINOR ARCANA (56) ===== */
+const SUITS=[
+ {key:'wands',ko:'완드',en:'WANDS',theme:'열정과 행동, 일과 의욕의 흐름',extra:'불의 원소에 속해 의지, 창의력, 추진력을 다뤄요.'},
+ {key:'cups',ko:'컵',en:'CUPS',theme:'감정과 마음, 관계 속의 정서',extra:'물의 원소에 속해 사랑, 공감, 직관을 다뤄요.'},
+ {key:'swords',ko:'소드',en:'SWORDS',theme:'생각과 선택, 머릿속 갈등',extra:'공기의 원소에 속해 판단, 소통, 진실, 때로는 갈등을 다뤄요.'},
+ {key:'pentacles',ko:'펜타클',en:'PENTACLES',theme:'현실과 결실, 돈과 일상',extra:'흙의 원소에 속해 돈, 건강, 일, 안정적인 성과를 다뤄요.'}
+];
+const PIP=['에이스','2','3','4','5','6','7','8','9','10'];
+const PIP_MEAN=[
+ {kw:'시작',t:'막 피어나는 씨앗처럼 새로운 기운이 움트는 단계',d:'새로운 기회와 가능성이 선물처럼 주어졌으니 망설이지 말고 첫걸음을 내딛어 보세요.'},
+ {kw:'균형',t:'두 가지 사이에서 저울질하며 균형을 찾는 단계',d:'선택을 앞두고 저울질 중이라면 어느 한쪽을 버리기보다 조화를 찾는 방법을 고민해 보세요.'},
+ {kw:'성장',t:'처음의 기운이 뻗어나가 모양을 갖추는 단계',d:'협력과 확장의 시기로 혼자보다 함께할 때 더 큰 결실이 맺혀요.'},
+ {kw:'안정',t:'숨을 고르며 지금 자리를 다지는 단계',d:'안정은 얻었지만 지나친 정체는 경계해야 해요. 쉬어가되 다음 단계를 준비하세요.'},
+ {kw:'변화',t:'예상 못한 흔들림과 작은 갈등이 찾아오는 단계',d:'갈등과 시련이 있지만 이를 통해 무엇이 중요한지 선명해지는 과정이에요.'},
+ {kw:'조화',t:'흔들렸던 것들이 제자리를 찾아가는 단계',d:'나눔과 도움이 오가며 회복되는 시기로, 받는 것과 주는 것의 균형이 중요해요.'},
+ {kw:'점검',t:'지금까지 온 길을 점검해보는 단계',d:'성급한 결론 대신 현재 상황을 객관적으로 평가하고 전략을 다시 세워보세요.'},
+ {kw:'숙련',t:'꾸준함이 쌓여 익숙해지는 단계',d:'반복과 노력이 실력으로 바뀌는 때예요. 지금의 성실함이 곧 큰 힘이 돼요.'},
+ {kw:'완성 직전',t:'거의 다 왔지만 긴장을 놓을 수 없는 단계',d:'목표가 코앞이니 마지막까지 집중하되, 스스로에게 충분히 보상하는 것도 잊지 마세요.'},
+ {kw:'완성',t:'흐름이 하나의 결과로 마무리되는 단계',d:'한 사이클이 끝나가는 시점으로 성과를 누리면서 다음 단계를 준비할 때예요.'}
+];
+const COURT=[
+ {ko:'페이지',en:'PAGE',kw:'배움',t:'서툴지만 호기심 어린 눈으로 배워가는 마음',d:'새로운 소식이나 배움의 기회를 상징해요. 부담 없이 시도하고 질문해 보세요.'},
+ {ko:'나이트',en:'KNIGHT',kw:'추진',t:'망설임 없이 움직이고 싶은 행동하는 마음',d:'목표를 향해 달려가는 에너지를 뜻해요. 속도를 내되 한쪽으로 치우치지 않게 조절해 주세요.'},
+ {ko:'퀸',en:'QUEEN',kw:'성숙',t:'차분하게 품고 다독이는 어른스러운 마음',d:'감정과 능력을 안정적으로 다스리는 모습으로 공감과 돌봄이 큰 힘이 돼요.'},
+ {ko:'킹',en:'KING',kw:'숙련',t:'경험으로 중심을 잡은 완숙한 마음',d:'권위와 책임감으로 상황을 이끄는 모습으로 냉철하되 너그러운 판단이 필요해요.'}
+];
+let MINOR=[];
+SUITS.forEach(s=>{
+  PIP.forEach((p,i)=>{const m=PIP_MEAN[i];
+    MINOR.push({ko:`${s.ko} ${p}`,en:`${p.toUpperCase()} OF ${s.en}`,kw:m.kw,
+      essence:`${s.theme} 속에서, ${m.t}를 보여주는 카드예요.`,detail:`${s.ko} 수트는 ${s.extra} ${m.d}`,
+      arc:'minor',suit:s.key,rank:i+1,isCourt:false});});
+  COURT.forEach((c,i)=>{
+    MINOR.push({ko:`${s.ko} ${c.ko}`,en:`${c.en} OF ${s.en}`,kw:c.kw,
+      essence:`${s.theme} 속에서, ${c.t}를 나타내는 카드예요.`,detail:`${s.ko} 수트는 ${s.extra} ${c.d}`,
+      arc:'minor',suit:s.key,rank:11+i,isCourt:true,court:i});});
+});
+MINOR=MINOR.map((c,i)=>({...c,id:22+i}));
+const CARDS=[...MAJOR,...MINOR]; // 78장
+
+/* ===== 고민 분야 ===== */
+const TOPIC_OPTIONS=[
+ {key:'love',label:'연애',sub:'설렘, 이별, 짝사랑',empathy:'마음이 왔다갔다 많이 복잡하셨겠어요.'},
+ {key:'friend',label:'친구',sub:'우정, 갈등, 거리감',empathy:'혼자 끙끙 앓았을 걸 생각하니 마음이 쓰여요.'},
+ {key:'family',label:'가족',sub:'부모님, 형제, 집안일',empathy:'가까운 사이라서 더 어려우셨을 것 같아요.'},
+ {key:'study',label:'공부',sub:'시험, 성적, 진학',empathy:'혼자 부담을 많이 짊어지고 계셨겠어요.'},
+ {key:'career',label:'진로',sub:'취업, 이직, 일',empathy:'앞날에 대한 고민, 쉽지 않으셨을 거예요.'},
+ {key:'general',label:'기타',sub:'그 외의 고민',empathy:'요즘 생각이 많으셨겠어요.'}
+];
+let selectedTopic = null;
+const topicGrid=document.getElementById('topicGrid');
+TOPIC_OPTIONS.forEach(t=>{
+  const chip=document.createElement('div');
+  chip.className='topic-chip';
+  chip.innerHTML=`${t.label}<span class="ti-sub">${t.sub}</span>`;
+  chip.addEventListener('click',()=>{
+    document.querySelectorAll('.topic-chip').forEach(c=>c.classList.remove('selected'));
+    chip.classList.add('selected');
+    selectedTopic=t;
+    setTimeout(()=>goTo('screen-concern'),200);
+  });
+  topicGrid.appendChild(chip);
+});
+
+const POSITION_FRAME={
+ present:(kw)=>`지금 당신은 '${kw}'와(과) 맞닿아 있는 자리에 서 있는 것 같아요.`,
+ future:(kw)=>`앞으로는 '${kw}'의 기운이 서서히 드러나면서, 지금과는 다른 흐름이 열릴 수 있어요.`,
+ advice:(kw)=>`이 시기에 당신에게 필요한 건, '${kw}'라는 말을 스스로에게 한 번 더 물어보는 일이에요.`
+};
+
+/* ===== STATE ===== */
+const state={name:'',birth:'',concern:'',topic:null,deck:[],drawn:[],flippedCount:0,hidden:null};
+const SCREENS=['screen-intro','screen-info','screen-topic','screen-concern','screen-confirm','screen-select','screen-reveal','screen-results','screen-hidden','screen-share'];
+const PROGRESS_LABELS={'screen-info':'01 · 당신을 알려주세요','screen-topic':'02 · 고민 분야 선택','screen-concern':'03 · 고민을 적어요','screen-confirm':'04 · 내용 확인','screen-select':'05 · 카드 고르기','screen-reveal':'06 · 카드 열기','screen-results':'07 · 리딩 확인','screen-hidden':'08 · 숨겨진 카드','screen-share':'09 · 마무리'};
+function goTo(id){
+  SCREENS.forEach(s=>document.getElementById(s).classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const pw=document.getElementById('progressWrap');
+  if(id==='screen-intro'){pw.classList.remove('show');}
+  else{pw.classList.add('show');
+    const idx=SCREENS.indexOf(id);
+    document.getElementById('progressFill').style.width=((idx)/(SCREENS.length-1)*100)+'%';
+    document.getElementById('progressLabel').textContent=PROGRESS_LABELS[id]||'';
+  }
+  window.scrollTo(0,0);
+}
+(function initStars(){
+  const wrap=document.getElementById('stars'); const n=46;
+  for(let i=0;i<n;i++){
+    const s=document.createElement('div'); s.className='star';
+    const size=Math.random()*2+1;
+    s.style.width=size+'px'; s.style.height=size+'px';
+    s.style.left=Math.random()*100+'%'; s.style.top=Math.random()*100+'%';
+    s.style.animationDelay=(Math.random()*4)+'s'; s.style.animationDuration=(3+Math.random()*3)+'s';
+    wrap.appendChild(s);
+  }
+})();
+
+function seededRandom(seed){let s=seed%2147483647; if(s<=0)s+=2147483646; return function(){s=s*16807%2147483647; return (s-1)/2147483646;};}
+
+/* ===== 카드 그림 (SVG 일러스트) ===== */
+const MAJOR_BG=[['#2a4a7a','#e8cf93'],['#4a1d6e','#a0527a'],['#10224a','#3a4a8a'],['#2d5a3a','#c8a24d'],['#6a1d1d','#c8683a'],['#4a3a6a','#8a6aaa'],['#6a2d5a','#e8a0b0'],['#1a3a6a','#c8a24d'],['#6a4a1d','#e8cf93'],['#1a1a3a','#4a4a7a'],['#3a1d6a','#c8a24d'],['#3a3a6a','#c8a24d'],['#1a3a4a','#4a7a8a'],['#1a1a1a','#6a1d3a'],['#2a4a6a','#a0c8e8'],['#2a0a0a','#6a1d1d'],['#1a1a2a','#8a2d1d'],['#0a1a4a','#4a6ac8'],['#0a0a2a','#3a3a7a'],['#c8a24d','#e8a03a'],['#2a2a5a','#a0a0e8'],['#2d1d5a','#c8a24d']];
+const MAJOR_ART=[
+`<circle cx="72" cy="26" r="10" fill="#e8cf93" opacity=".8"/><path d="M10 78 L58 66 L90 74 L90 100 L10 100Z" fill="#1a0f2e" opacity=".7"/><line x1="40" y1="64" x2="40" y2="42" stroke="#f5eefc" stroke-width="3"/><circle cx="40" cy="36" r="6" fill="#f5eefc"/><line x1="40" y1="46" x2="54" y2="56" stroke="#f5eefc" stroke-width="2"/><rect x="50" y="50" width="9" height="9" fill="#e8cf93"/><path d="M62 70 q6 -8 10 0" stroke="#f5eefc" stroke-width="2" fill="none"/>`,
+`<path d="M32 30 Q42 18 50 30 Q58 42 68 30" stroke="#e8cf93" stroke-width="2.5" fill="none"/><line x1="50" y1="40" x2="50" y2="78" stroke="#f5eefc" stroke-width="3"/><circle cx="50" cy="38" r="5" fill="#f5eefc"/><rect x="20" y="78" width="60" height="5" fill="#e8cf93"/><circle cx="30" cy="74" r="3" fill="#e8cf93"/><circle cx="70" cy="74" r="3" fill="#f5eefc"/>`,
+`<rect x="18" y="30" width="9" height="55" fill="#e8cf93" opacity=".8"/><rect x="73" y="30" width="9" height="55" fill="#e8cf93" opacity=".8"/><circle cx="50" cy="38" r="12" fill="#f5eefc"/><circle cx="55" cy="36" r="10" fill="#2d1d5a"/><path d="M36 85 Q50 52 64 85Z" fill="#a0c8e8" opacity=".7"/>`,
+`<circle cx="50" cy="32" r="10" fill="#f5eefc"/><path d="M30 80 Q50 40 70 80Z" fill="#e8a0b0" opacity=".85"/><circle cx="50" cy="24" r="12" stroke="#e8cf93" stroke-width="1.5" fill="none" stroke-dasharray="3 3"/><path d="M14 90 L22 66 L30 90 M72 90 L80 70 L88 90" stroke="#e8cf93" stroke-width="2" fill="none"/>`,
+`<rect x="30" y="42" width="40" height="42" fill="#c8683a" opacity=".85" stroke="#e8cf93" stroke-width="1.5"/><path d="M34 42 L38 28 L44 36 L50 24 L56 36 L62 28 L66 42Z" fill="#e8cf93"/><circle cx="50" cy="58" r="7" fill="#f5eefc"/>`,
+`<path d="M20 30 Q50 6 80 30" stroke="#e8cf93" stroke-width="2.5" fill="none"/><circle cx="50" cy="40" r="9" fill="#f5eefc"/><path d="M36 82 L42 52 L58 52 L64 82Z" fill="#a0527a" opacity=".9"/><line x1="76" y1="50" x2="76" y2="82" stroke="#e8cf93" stroke-width="2"/><line x1="70" y1="56" x2="82" y2="56" stroke="#e8cf93" stroke-width="2"/>`,
+`<circle cx="50" cy="20" r="10" fill="#e8cf93"/><circle cx="34" cy="66" r="10" fill="#f5eefc"/><circle cx="66" cy="66" r="10" fill="#e8a0b0"/><path d="M34 54 L50 30 L66 54" stroke="#e8cf93" stroke-width="1.5" fill="none"/><path d="M26 82 Q34 74 42 82 M58 82 Q66 74 74 82" stroke="#f5eefc" stroke-width="2" fill="none"/>`,
+`<rect x="28" y="36" width="44" height="30" fill="#1a3a6a" stroke="#e8cf93" stroke-width="2"/><path d="M28 36 L50 18 L72 36Z" fill="#e8cf93" opacity=".8"/><circle cx="36" cy="72" r="9" stroke="#f5eefc" stroke-width="2.5" fill="none"/><circle cx="64" cy="72" r="9" stroke="#f5eefc" stroke-width="2.5" fill="none"/><circle cx="50" cy="50" r="5" fill="#f5eefc"/>`,
+`<path d="M30 28 Q40 14 50 28 Q60 42 70 28" stroke="#f5eefc" stroke-width="2.5" fill="none"/><circle cx="50" cy="52" r="8" fill="#f5eefc"/><path d="M22 80 Q30 58 50 64 Q74 58 80 78 L78 86 L26 86Z" fill="#e8cf93" opacity=".9"/><circle cx="76" cy="66" r="4" fill="#6a4a1d"/>`,
+`<path d="M50 20 L42 52 L58 52Z" fill="#a0a0e8" opacity=".6"/><circle cx="50" cy="58" r="8" fill="#9a9a9a"/><path d="M38 84 L44 62 L56 62 L62 84Z" fill="#7a7a9a"/><line x1="70" y1="48" x2="70" y2="86" stroke="#e8cf93" stroke-width="2"/><circle cx="50" cy="16" r="4" fill="#e8cf93"/>`,
+`<circle cx="50" cy="52" r="28" stroke="#e8cf93" stroke-width="3" fill="none"/><circle cx="50" cy="52" r="8" fill="#e8cf93"/>`+[0,45,90,135].map(a=>`<line x1="50" y1="52" x2="${50+28*Math.cos(a*Math.PI/180)}" y2="${52+28*Math.sin(a*Math.PI/180)}" stroke="#e8cf93" stroke-width="1.6"/><line x1="50" y1="52" x2="${50-28*Math.cos(a*Math.PI/180)}" y2="${52-28*Math.sin(a*Math.PI/180)}" stroke="#e8cf93" stroke-width="1.6"/>`).join(''),
+`<line x1="50" y1="22" x2="50" y2="84" stroke="#e8cf93" stroke-width="3"/><line x1="26" y1="40" x2="74" y2="40" stroke="#e8cf93" stroke-width="2.5"/><path d="M26 40 L18 62 L34 62Z M74 40 L66 62 L82 62Z" fill="#f5eefc" opacity=".8"/><circle cx="50" cy="20" r="6" fill="#f5eefc"/>`,
+`<line x1="22" y1="22" x2="78" y2="22" stroke="#e8cf93" stroke-width="3"/><line x1="50" y1="22" x2="50" y2="44" stroke="#f5eefc" stroke-width="2"/><circle cx="50" cy="76" r="9" fill="#f5eefc"/><path d="M50 44 L38 66 L62 66Z" fill="#4a7a8a"/>`,
+`<line x1="10" y1="72" x2="90" y2="72" stroke="#e8cf93" stroke-width="2"/><path d="M50 72 A40 40 0 0 1 20 50 M50 72 A40 40 0 0 0 80 50" stroke="#e8cf93" stroke-width="2" fill="none"/><circle cx="50" cy="50" r="14" fill="#e8cf93" opacity=".8"/><path d="M36 82 L44 72 M64 82 L56 72" stroke="#f5eefc" stroke-width="2"/>`,
+`<path d="M26 42 Q26 62 38 62 Q50 62 50 42Z" fill="#a0c8e8" opacity=".85"/><path d="M50 42 Q50 62 62 62 Q74 62 74 42Z" fill="#e8cf93" opacity=".85"/><path d="M38 40 Q50 18 62 40" stroke="#f5eefc" stroke-width="2.5" fill="none"/><circle cx="50" cy="26" r="8" fill="#f5eefc"/>`,
+`<path d="M34 46 Q26 22 38 16 M66 46 Q74 22 62 16" stroke="#e8cf93" stroke-width="3" fill="none"/><circle cx="50" cy="56" r="20" fill="#6a1d1d" stroke="#e8cf93" stroke-width="2"/><circle cx="42" cy="52" r="3" fill="#e8cf93"/><circle cx="58" cy="52" r="3" fill="#e8cf93"/><path d="M28 86 Q50 74 72 86" stroke="#9a9a9a" stroke-width="2" fill="none"/>`,
+`<rect x="38" y="46" width="24" height="42" fill="#6a6a8a" stroke="#e8cf93" stroke-width="2"/><path d="M40 46 L50 30 L60 46Z" fill="#e8cf93"/><path d="M62 10 L48 34 L58 34 L44 58" stroke="#f5eefc" stroke-width="3" fill="none"/>`,
+`<path d="M50 14 L56 40 L84 48 L56 56 L50 84 L44 56 L16 48 L44 40Z" fill="#e8cf93" stroke="#f5eefc" stroke-width="1.5"/><circle cx="26" cy="24" r="3" fill="#f5eefc"/><circle cx="76" cy="22" r="2.5" fill="#f5eefc"/><circle cx="80" cy="76" r="3" fill="#f5eefc"/><circle cx="22" cy="74" r="2.5" fill="#f5eefc"/>`,
+`<circle cx="50" cy="44" r="22" fill="#e8cf93" opacity=".9"/><circle cx="58" cy="40" r="19" fill="#0a0a2a"/><path d="M30 84 Q50 66 70 84" stroke="#a0a0e8" stroke-width="2" fill="none"/><path d="M20 90 L20 66 L28 66 L28 90M72 90 L72 66 L80 66 L80 90" fill="#4a4a7a"/>`,
+`<circle cx="50" cy="46" r="18" fill="#fff3b0"/><circle cx="50" cy="46" r="24" stroke="#fff3b0" stroke-width="2" fill="none"/>`+[0,45,90,135,180,225,270,315].map(a=>`<line x1="${50+30*Math.cos(a*Math.PI/180)}" y1="${46+30*Math.sin(a*Math.PI/180)}" x2="${50+40*Math.cos(a*Math.PI/180)}" y2="${46+40*Math.sin(a*Math.PI/180)}" stroke="#fff3b0" stroke-width="2.5"/>`).join('')+`<circle cx="50" cy="84" r="6" fill="#f5eefc"/>`,
+`<path d="M20 44 L50 30 L50 62Z" fill="#e8cf93"/><line x1="50" y1="46" x2="86" y2="46" stroke="#f5eefc" stroke-width="2"/><path d="M60 30 L74 24 M60 62 L74 68" stroke="#e8cf93" stroke-width="2"/><rect x="24" y="76" width="16" height="12" fill="#a0a0e8"/><rect x="60" y="76" width="16" height="12" fill="#a0a0e8"/>`,
+`<ellipse cx="50" cy="52" rx="20" ry="28" stroke="#e8cf93" stroke-width="3" fill="none"/><path d="M26 30 Q14 52 28 76 M74 30 Q86 52 72 76" stroke="#f5eefc" stroke-width="2.5" fill="none"/><circle cx="50" cy="52" r="7" fill="#f5eefc"/><circle cx="22" cy="20" r="3" fill="#e8cf93"/><circle cx="78" cy="20" r="3" fill="#e8cf93"/>`
+];
+const SUIT_SYMBOL={
+  wands:(x,y,s)=>`<line x1="${x}" y1="${y-s*1.4}" x2="${x}" y2="${y+s*1.4}" stroke="#a07040" stroke-width="2.6"/><path d="M${x} ${y-s*1.4} q${s*.7} -${s*.4} ${s*.5} -${s*1.1} q-${s*1.2} ${s*.3} -${s*.5} ${s*1.1}" fill="#e8a03a"/><path d="M${x} ${y-s*.2} q${s*.7} -${s*.5} ${s*.9} -${s*.9}" stroke="#4a8a3a" stroke-width="1.4" fill="none"/>`,
+  cups:(x,y,s)=>`<path d="M${x-s} ${y-s} Q${x-s} ${y+s*.4} ${x} ${y+s*.4} Q${x+s} ${y+s*.4} ${x+s} ${y-s}Z" fill="#a0c8e8" stroke="#e8cf93" stroke-width="1.4"/><line x1="${x}" y1="${y+s*.4}" x2="${x}" y2="${y+s*1.2}" stroke="#e8cf93" stroke-width="1.6"/><line x1="${x-s*.6}" y1="${y+s*1.2}" x2="${x+s*.6}" y2="${y+s*1.2}" stroke="#e8cf93" stroke-width="1.8"/>`,
+  swords:(x,y,s)=>`<path d="M${x} ${y-s*1.5} L${x+s*.35} ${y+s*.5} L${x-s*.35} ${y+s*.5}Z" fill="#dfe6f2" stroke="#9aa8c8" stroke-width="1"/><line x1="${x-s*.8}" y1="${y+s*.5}" x2="${x+s*.8}" y2="${y+s*.5}" stroke="#e8cf93" stroke-width="2"/><line x1="${x}" y1="${y+s*.5}" x2="${x}" y2="${y+s*1.3}" stroke="#a07040" stroke-width="2.4"/>`,
+  pentacles:(x,y,s)=>{let p='';for(let i=0;i<5;i++){const a=(Math.PI*2*i/5)-Math.PI/2;p+=(i?'L':'M')+(x+Math.cos(a)*s*.7)+' '+(y+Math.sin(a)*s*.7)+' ';}return `<circle cx="${x}" cy="${y}" r="${s}" fill="#c8a24d" stroke="#e8cf93" stroke-width="1.4"/><path d="${p}Z" stroke="#fff3b0" stroke-width="1" fill="none"/>`;}
+};
+const SUIT_BG={wands:['#6a2d0a','#e8a03a'],cups:['#0a2a5a','#4a8ac8'],swords:['#2a2a4a','#8a9ac8'],pentacles:['#1d3a1d','#c8a24d']};
+function frame(bg,inner,size){
+  const id='g'+Math.random().toString(36).slice(2,8);
+  return `<svg viewBox="0 0 100 100" width="${size}" height="${size}"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${bg[0]}"/><stop offset="1" stop-color="${bg[1]}" stop-opacity=".75"/></linearGradient></defs><rect x="2" y="2" width="96" height="96" rx="8" fill="url(#${id})" stroke="#c8a24d" stroke-width="1.5"/><rect x="6" y="6" width="88" height="88" rx="5" fill="none" stroke="#e8cf93" stroke-width=".6" opacity=".6"/>${inner}</svg>`;
+}
+function majorIcon(id,size){return frame(MAJOR_BG[id],MAJOR_ART[id],size||46);}
+function minorIcon(card,size){
+  const sym=SUIT_SYMBOL[card.suit]; let inner='<path d="M6 80 Q50 70 94 80 L94 94 L6 94Z" fill="#000" opacity=".25"/>';
+  if(!card.isCourt){
+    const n=card.rank; const layouts={1:[[50,50]],2:[[50,32],[50,68]],3:[[50,26],[32,66],[68,66]],4:[[32,32],[68,32],[32,68],[68,68]],5:[[32,30],[68,30],[50,50],[32,70],[68,70]],6:[[34,28],[66,28],[34,50],[66,50],[34,72],[66,72]],7:[[34,26],[66,26],[34,47],[66,47],[50,36],[34,68],[66,68]],8:[[34,24],[66,24],[34,43],[66,43],[34,62],[66,62],[50,33],[50,72]],9:[[30,24],[50,24],[70,24],[30,48],[50,48],[70,48],[30,72],[50,72],[70,72]],10:[[30,22],[50,22],[70,22],[30,44],[70,44],[30,66],[50,66],[70,66],[50,33],[50,80]]};
+    const sz=n===1?16:(n<=4?10:7);
+    layouts[n].forEach(([x,y])=>{inner+=sym(x,y,sz);});
+  }else{
+    const hat=['M36 34 L50 22 L64 34Z','M34 34 L50 18 L66 34 L58 34 L50 26 L42 34Z','M34 34 L40 20 L46 30 L50 18 L54 30 L60 20 L66 34Z','M32 34 L38 18 L44 28 L50 14 L56 28 L62 18 L68 34Z'][card.court];
+    inner+=`<path d="${hat}" fill="#e8cf93"/><circle cx="50" cy="42" r="8" fill="#f5eefc"/><path d="M32 86 L38 54 L62 54 L68 86Z" fill="#a0527a" opacity=".9"/>`+sym(72,64,9);
+  }
+  return frame(SUIT_BG[card.suit],inner,size||46);
+}
+function cardIcon(cardId,size){const c=CARDS[cardId];return c.arc==='major'?majorIcon(cardId,size):minorIcon(c,size);}
+
+/* ===== STEP1 ===== */
+const inputName=document.getElementById('inputName'), inputBirth=document.getElementById('inputBirth');
+function checkInfo(){document.getElementById('btnInfoNext').disabled=!(inputName.value.trim().length>0 && inputBirth.value);}
+inputName.addEventListener('input',checkInfo); inputBirth.addEventListener('input',checkInfo);
+
+/* ===== STEP3 concern ===== */
+const inputConcern=document.getElementById('inputConcern');
+inputConcern.addEventListener('input',()=>{
+  const len=inputConcern.value.length;
+  document.getElementById('concernCount').textContent=len;
+  document.getElementById('btnConcernNext').disabled=len<10;
+});
+function prepareConfirm(){
+  state.name=inputName.value.trim(); state.birth=inputBirth.value; state.concern=inputConcern.value.trim();
+  state.topic=selectedTopic || TOPIC_OPTIONS[5];
+  document.getElementById('confirmName').textContent=state.name;
+  document.getElementById('confirmBirth').textContent=formatBirth(state.birth);
+  document.getElementById('confirmTopic').textContent=state.topic.label;
+  document.getElementById('confirmConcern').textContent=state.concern;
+  goTo('screen-confirm');
+}
+function formatBirth(v){if(!v)return ''; const [y,m,d]=v.split('-'); return `${y}년 ${parseInt(m)}월 ${parseInt(d)}일`;}
+function birthSeed(v){ if(!v) return 7; return v.split('-').join('').split('').reduce((a,c)=>a+parseInt(c),0); }
+
+/* ===== STEP5 select (원형 배치) ===== */
+function shuffledDeck(){
+  const arr=CARDS.map(c=>c.id);
+  for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]];}
+  return arr;
+}
+function startCardSelect(){
+  state.deck=shuffledDeck(); state.drawn=[];
+  const displayCount=16;
+  const wrap=document.getElementById('circleWrap');
+  wrap.innerHTML='<div class="circle-glow"></div>';
+  const R=118;
+  for(let i=0;i<displayCount;i++){
+    const angle=(Math.PI*2*i/displayCount)-Math.PI/2;
+    const x=Math.cos(angle)*R, y=Math.sin(angle)*R*0.82;
+    const el=document.createElement('div');
+    el.className='mini-card'; el.dataset.slot=i;
+    el.style.transform=`translate(${x}px, ${y}px) rotate(${angle*180/Math.PI+90}deg)`;
+    el.addEventListener('click',()=>pickCard(el));
+    wrap.appendChild(el);
+  }
+  renderPickedStrip(); updateSelectCount(); goTo('screen-select');
+}
+function pickCard(el){
+  if(state.drawn.length>=3||el.classList.contains('picked'))return;
+  const cardId=state.deck[state.drawn.length];
+  state.drawn.push(cardId); el.classList.add('picked');
+  renderPickedStrip(); updateSelectCount();
+  if(state.drawn.length===3){
+    document.querySelectorAll('.mini-card').forEach(c=>c.classList.add('disabled'));
+    setTimeout(()=>{setupReveal(); goTo('screen-reveal');},500);
+  }
+}
+function renderPickedStrip(){
+  const strip=document.getElementById('pickedStrip'); strip.innerHTML='';
+  for(let i=0;i<3;i++){
+    const slot=document.createElement('div');
+    slot.className='pick-slot'+(state.drawn[i]!==undefined?' filled':'');
+    slot.textContent=state.drawn[i]!==undefined?(i+1):'';
+    strip.appendChild(slot);
+  }
+}
+function updateSelectCount(){document.getElementById('selectCount').textContent=`${state.drawn.length} / 3장 선택`;}
+
+/* ===== STEP6 reveal ===== */
+function setupReveal(){
+  state.flippedCount=0;
+  const wrap=document.getElementById('revealCards'); wrap.innerHTML='';
+  document.getElementById('btnToResults').disabled=true;
+  document.getElementById('revealHint').textContent='카드를 하나씩 눌러 공개하세요';
+  state.drawn.forEach((cardId)=>{
+    const card=CARDS[cardId];
+    const flip=document.createElement('div'); flip.className='flip-card';
+    flip.innerHTML=`<div class="flip-glow"></div><div class="flip-inner">
+      <div class="flip-face flip-back"></div>
+      <div class="flip-face flip-front">${cardIcon(cardId,74)}<div class="fc-name">${card.ko}</div><div class="fc-suit">${card.en}</div></div>
+    </div>`;
+    flip.addEventListener('click',()=>{
+      if(flip.classList.contains('flipped'))return;
+      flip.classList.add('flipped'); state.flippedCount++;
+      if(state.flippedCount===3){document.getElementById('revealHint').textContent='세 장이 모두 열렸어요'; document.getElementById('btnToResults').disabled=false;}
+      else{document.getElementById('revealHint').textContent=`${state.flippedCount} / 3장 공개됨`;}
+    });
+    wrap.appendChild(flip);
+  });
+}
+
+/* ===== 해석 ===== */
+function concernSnippet(){const t=state.concern; return t.length<=40?t:t.slice(0,40)+'…';}
+function escapeHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+const TOPIC_LINES={
+ love:{present:'연애에서는 상대와의 거리감, 내가 바라는 모습과 실제 관계 사이의 간격을 이 카드가 비춰주고 있어요.',future:'관계가 앞으로 어떤 방향으로 흘러갈지, 이 카드의 기운이 서서히 드러나는 모습으로 읽을 수 있어요.',advice:'연애에서는 상대를 바꾸려 하기보다, 내 마음이 진짜 원하는 것을 솔직하게 표현하는 것부터 시작해 보세요.'},
+ friend:{present:'친구 관계에서는 서운함이나 거리감이 쌓인 지점, 혹은 서로 다른 기대를 이 카드가 보여주고 있어요.',future:'관계가 이어질지 달라질지, 이 카드의 흐름이 조금씩 방향을 알려줄 거예요.',advice:'친구와의 일은 추측보다 솔직한 대화가 가장 빠른 해결책이 돼요. 내 감정을 비난 없이 전해 보세요.'},
+ family:{present:'가족 문제에서는 가까운 사이라 말하지 못한 기대와 책임감이 이 카드에 드러나 있어요.',future:'가족 안에서의 분위기와 역할이 이 카드의 흐름대로 서서히 바뀔 가능성이 있어요.',advice:'가족에게는 이해받고 싶은 마음이 크기 때문에, 먼저 상대의 입장을 한 번 헤아려 보는 것이 도움이 돼요.'},
+ study:{present:'공부에서는 지금의 집중력, 부담감, 그리고 스스로를 평가하는 기준이 이 카드에 반영되어 있어요.',future:'성과가 쌓이는 방식이나 마음가짐의 변화가 이 카드의 기운으로 나타날 수 있어요.',advice:'공부는 결과보다 꾸준한 리듬이 중요해요. 오늘 할 수 있는 만큼의 계획을 지키는 것에 집중해 보세요.'},
+ career:{present:'진로에서는 현재 일이나 선택 앞에서의 확신과 불안이 이 카드에 함께 담겨 있어요.',future:'진로의 방향과 기회가 이 카드의 흐름에 따라 서서히 모습을 드러낼 수 있어요.',advice:'진로는 한 번의 결정보다 작은 시도로 확인하는 것이 안전해요. 가능한 범위에서 먼저 경험해 보세요.'},
+ general:{present:'지금 마음속에 자리한 고민의 핵심을 이 카드가 조용히 비춰주고 있어요.',future:'이 카드의 기운은 앞으로의 흐름에서 점차 선명하게 나타날 거예요.',advice:'너무 많은 답을 한꺼번에 찾으려 하지 말고, 지금 할 수 있는 작은 한 걸음에 집중해 보세요.'}
+};
+const CLOSING={present:'지금 느끼는 감정은 틀린 게 아니니 스스로를 너무 몰아세우지 않아도 괜찮아요.',future:'다만 이건 확정된 결과가 아니라 흐름이니, 당신의 선택에 따라 얼마든지 달라질 수 있어요.',advice:'오늘 이 이야기 중 마음에 와닿는 한 가지만 가볍게 실천해 보세요.'};
+function buildInterpretation(cardId,position){
+  const card=CARDS[cardId]; const snip=concernSnippet();
+  const empathy=position==='present'?state.topic.empathy+' ':'';
+  const topicLine=(TOPIC_LINES[state.topic.key]||TOPIC_LINES.general)[position];
+  return `${empathy}${card.essence} ${card.detail}<br><br>${POSITION_FRAME[position](card.kw)} ${topicLine}<br><br>“<span class="quote">${escapeHtml(snip)}</span>” 하신 마음과 연결해 보면, ${CLOSING[position]}`;
+}
+function showResults(){
+  document.getElementById('resultsName').textContent=state.name?state.name:'당신';
+  ['present','future','advice'].forEach((pos,i)=>{
+    const cardId=state.drawn[i]; const card=CARDS[cardId];
+    document.getElementById('panel-'+pos).innerHTML=`
+      <div class="result-card-head">${cardIcon(cardId,84)}<div><div class="name-ko">${card.ko}</div><div class="name-en">${card.en}</div></div></div>
+      <div class="result-text">${buildInterpretation(cardId,pos)}</div>`;
+  });
+  const c1=CARDS[state.drawn[0]], c2=CARDS[state.drawn[1]], c3=CARDS[state.drawn[2]];
+  document.getElementById('synthText').innerHTML=
+    `${state.name?state.name+'님, ':''}지금은 <b style="color:var(--gold-soft);">${c1.kw}</b>의 자리에 서 있고, 앞으로는 <b style="color:var(--gold-soft);">${c2.kw}</b>의 흐름을 마주하게 될 가능성이 보여요. `
+    +`그 사이에서 중심을 잃지 않으려면 <b style="color:var(--gold-soft);">${c3.kw}</b>가 필요해요. `
+    +`“${escapeHtml(concernSnippet())}”라는 마음, 지금 이 정도쯤 와 있는 것 같아요. 너무 서두르지 않아도 괜찮아요.`;
+
+  const cardSeed=state.drawn.reduce((a,b)=>a+b,1);
+  const seed=cardSeed*31 + birthSeed(state.birth)*13;
+  const rnd=seededRandom(seed+7);
+  const colors=['미드나잇 퍼플','앤틱 골드','인디고 블루','와인 레드','문라이트 실버','포레스트 그린','더스티 로즈','딥 네이비','라벤더 그레이','샴페인 베이지'];
+  document.getElementById('funKeyword').textContent=c1.kw+' · '+c3.kw;
+  document.getElementById('funColor').textContent=colors[Math.floor(rnd()*colors.length)];
+  document.getElementById('funNumber').textContent=(Math.floor(rnd()*9)+1)+' · '+(Math.floor(rnd()*9)+1);
+  setGauge('Love',40+Math.floor(seededRandom(seed*11+1)()*55));
+  setGauge('Money',40+Math.floor(seededRandom(seed*13+2)()*55));
+  setGauge('Rel',40+Math.floor(seededRandom(seed*17+3)()*55));
+  goTo('screen-results');
+}
+function setGauge(key,val){document.getElementById('gauge'+key).style.width=val+'%'; document.getElementById('gauge'+key+'Num').textContent=val;}
+document.getElementById('tabs').addEventListener('click',(e)=>{
+  const tab=e.target.closest('.tab'); if(!tab)return;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  tab.classList.add('active'); document.getElementById('panel-'+tab.dataset.tab).classList.add('active');
+});
+
+/* ===== 숨겨진 카드 ===== */
+function revealHidden(){
+  const remaining=CARDS.map(c=>c.id).filter(id=>!state.drawn.includes(id));
+  const pick=remaining[Math.floor(Math.random()*remaining.length)];
+  state.hidden=pick; const card=CARDS[pick];
+  document.getElementById('hiddenCardHead').innerHTML=`${cardIcon(pick,96)}<div style="text-align:left;margin-left:12px;"><div class="name-ko">${card.ko}</div><div class="name-en">${card.en}</div></div>`;
+  document.getElementById('hiddenText').innerHTML=`${card.essence} ${card.detail}<br><br>이 카드는 오늘 이야기의 마지막 한 마디로, '<span class="quote">${card.kw}</span>'를 마음 한편에 살짝 담아두라는 말을 전해요.`;
+  document.getElementById('hiddenOrb').style.display='none';
+  document.getElementById('hiddenResult').classList.add('show');
+}
+
+/* ===== 공유/저장 ===== */
+const POS_LABEL={present:'현재 상황',future:'미래의 흐름',advice:'필요한 조언'};
+function plain(h){return (h||'').replace(/<br\s*\/?>/g,'\n').replace(/<[^>]+>/g,'').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');}
+function collectReading(){
+  const cards=['present','future','advice'].map((pos,i)=>{const c=CARDS[state.drawn[i]];return {pos,label:POS_LABEL[pos],id:c.id,ko:c.ko,en:c.en,text:plain(buildInterpretation(c.id,pos))};});
+  const hid=state.hidden!==null?CARDS[state.hidden]:null;
+  return {
+    head:`${state.name}님 · ${formatBirth(state.birth)} · 고민 분야: ${state.topic.label}`,
+    concern:state.concern, cards,
+    synth:plain(document.getElementById('synthText').innerHTML),
+    hidden:hid?{id:hid.id,ko:hid.ko,en:hid.en,text:plain(document.getElementById('hiddenText').innerHTML)}:null,
+    fun:`오늘의 키워드: ${document.getElementById('funKeyword').textContent}\n행운의 색: ${document.getElementById('funColor').textContent}\n행운의 숫자: ${document.getElementById('funNumber').textContent}\n연애운 ${document.getElementById('gaugeLoveNum').textContent} · 금전운 ${document.getElementById('gaugeMoneyNum').textContent} · 관계운 ${document.getElementById('gaugeRelNum').textContent}`
+  };
+}
+function buildShareText(){
+  const r=collectReading(); const line='────────────────';
+  let t=`✦ 미드나잇 타로 ✦\n${r.head}\n\n[고민]\n${r.concern}\n\n${line}\n`;
+  r.cards.forEach(c=>{t+=`\n■ ${c.label} — ${c.ko} (${c.en})\n${c.text}\n\n`;});
+  t+=`${line}\n\n■ 종합 리딩\n${r.synth}\n\n`;
+  if(r.hidden) t+=`■ 숨겨진 카드 — ${r.hidden.ko} (${r.hidden.en})\n${r.hidden.text}\n\n`;
+  t+=`${line}\n${r.fun}\n\n※ 이 리딩은 자기 성찰을 위한 콘텐츠이며, 미래를 확정하지 않습니다.`;
+  return t;
+}
+function showToast(msg){const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200);}
+async function copyShareText(){
+  const text=buildShareText();
+  try{await navigator.clipboard.writeText(text); showToast('타로 내용 전체를 복사했어요'); return;}catch(e){}
+  try{const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); const ok=document.execCommand('copy'); document.body.removeChild(ta); showToast(ok?'타로 내용 전체를 복사했어요':'복사에 실패했어요');}
+  catch(e){showToast('복사에 실패했어요');}
+}
+function wrapLines(ctx,text,maxW){
+  const out=[];
+  String(text).split('\n').forEach(par=>{
+    if(par===''){out.push('');return;}
+    let line='';
+    for(const ch of par){const t=line+ch; if(ctx.measureText(t).width>maxW&&line!==''){out.push(line); line=ch;} else line=t;}
+    out.push(line);
+  });
+  return out;
+}
+function loadSvgImg(id,size){
+  return new Promise(res=>{
+    const svg=cardIcon(id,size).replace('<svg ','<svg xmlns="http://www.w3.org/2000/svg" ');
+    const img=new Image(); img.onload=()=>res(img); img.onerror=()=>res(null);
+    img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+  });
+}
+async function saveAsImage(){
+  showToast('이미지를 만드는 중이에요…');
+  try{await document.fonts.ready;}catch(e){}
+  const r=collectReading(); const W=900, M=64, CW=W-M*2, IMG=150;
+  const cv=document.createElement('canvas'); cv.width=W; const ctx=cv.getContext('2d');
+  const F={title:'700 44px "Noto Serif KR",serif',sub:'500 20px "Noto Sans KR",sans-serif',sec:'700 26px "Noto Serif KR",serif',cname:'700 30px "Noto Serif KR",serif',en:'500 16px "Noto Sans KR",sans-serif',body:'400 21px "Noto Sans KR",sans-serif',small:'400 16px "Noto Sans KR",sans-serif'};
+  const blocks=[]; const add=b=>blocks.push(b);
+  add({t:'text',text:'미드나잇 타로',font:F.title,color:'#e8cf93',align:'center',lh:56,after:10});
+  add({t:'text',text:r.head,font:F.sub,color:'#b3a0cf',align:'center',lh:30,after:30});
+  add({t:'text',text:'고민',font:F.sec,color:'#c8a24d',lh:36,after:6});
+  add({t:'text',text:r.concern,font:F.body,color:'#b3a0cf',lh:34,after:36});
+  const imgs=await Promise.all(r.cards.map(c=>loadSvgImg(c.id,IMG*2)));
+  const himg=r.hidden?await loadSvgImg(r.hidden.id,IMG*2):null;
+  r.cards.forEach((c,i)=>{
+    add({t:'rule',after:26});
+    add({t:'cardhead',img:imgs[i],label:c.label,ko:c.ko,en:c.en,after:20});
+    add({t:'text',text:c.text,font:F.body,color:'#f5eefc',lh:36,after:34});
+  });
+  add({t:'rule',after:26});
+  add({t:'text',text:'종합 리딩',font:F.sec,color:'#c8a24d',lh:36,after:6});
+  add({t:'text',text:r.synth,font:F.body,color:'#f5eefc',lh:36,after:34});
+  if(r.hidden){
+    add({t:'cardhead',img:himg,label:'숨겨진 카드',ko:r.hidden.ko,en:r.hidden.en,after:20});
+    add({t:'text',text:r.hidden.text,font:F.body,color:'#f5eefc',lh:36,after:34});
+  }
+  add({t:'rule',after:26});
+  add({t:'text',text:r.fun,font:F.body,color:'#e8cf93',lh:36,after:34});
+  add({t:'text',text:'이 리딩은 자기 성찰을 위한 콘텐츠이며, 미래를 확정하지 않습니다.',font:F.small,color:'#7a6598',align:'center',lh:26,after:0});
+  // 측정
+  let y=70;
+  blocks.forEach(b=>{
+    if(b.t==='text'){ctx.font=b.font; b.lines=wrapLines(ctx,b.text,CW); b.y=y; y+=b.lines.length*b.lh+b.after;}
+    else if(b.t==='rule'){b.y=y; y+=2+b.after;}
+    else{b.y=y; y+=IMG+b.after;}
+  });
+  const H=y+60; cv.height=H;
+  const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,'#1e0f38'); g.addColorStop(1,'#0a0714'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#3d275e'; ctx.lineWidth=2; ctx.strokeRect(22,22,W-44,H-44);
+  blocks.forEach(b=>{
+    if(b.t==='text'){
+      ctx.font=b.font; ctx.fillStyle=b.color; ctx.textAlign=b.align==='center'?'center':'left'; ctx.textBaseline='top';
+      b.lines.forEach((ln,i)=>ctx.fillText(ln,b.align==='center'?W/2:M,b.y+i*b.lh+4));
+    }else if(b.t==='rule'){ctx.fillStyle='#3d275e'; ctx.fillRect(M,b.y,CW,2);}
+    else{
+      if(b.img) ctx.drawImage(b.img,M,b.y,IMG,IMG);
+      ctx.textAlign='left'; ctx.textBaseline='top';
+      ctx.fillStyle='#c8a24d'; ctx.font=F.sub; ctx.fillText(b.label,M+IMG+28,b.y+24);
+      ctx.fillStyle='#e8cf93'; ctx.font=F.cname; ctx.fillText(b.ko,M+IMG+28,b.y+58);
+      ctx.fillStyle='#7a6598'; ctx.font=F.en; ctx.fillText(b.en,M+IMG+28,b.y+102);
+    }
+  });
+  cv.toBlob(async(blob)=>{
+    const filename=`midnight-tarot-${Date.now()}.png`;
+    try{
+      const downloads=(window.claude&&window.claude.use)?await window.claude.use('downloads'):null;
+      if(downloads){const buf=await blob.arrayBuffer(); await downloads.save({filename,data:buf}); showToast('이미지를 저장했어요'); return;}
+    }catch(e){}
+    try{
+      const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(url),2000);
+      showToast('이미지를 저장했어요');
+    }catch(e){showToast('저장에 실패했어요');}
+  },'image/png');
+}
+function restartAll(){
+  state.name='';state.birth='';state.concern='';state.drawn=[];state.hidden=null; selectedTopic=null;
+  inputName.value='';inputBirth.value='';inputConcern.value='';
+  document.getElementById('concernCount').textContent='0';
+  document.getElementById('btnInfoNext').disabled=true;
+  document.getElementById('btnConcernNext').disabled=true;
+  document.querySelectorAll('.topic-chip').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('hiddenOrb').style.display='flex';
+  document.getElementById('hiddenResult').classList.remove('show');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelector('.tab[data-tab="present"]').classList.add('active');
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-present').classList.add('active');
+  goTo('screen-intro');
+}
+</script>
+</body>
+</html>
